@@ -1,0 +1,99 @@
+- 👋 Hi, I’m @zzikre
+- 👀 I’m interested in ...
+- 🌱 I’m currently learning ...
+- 💞️ I’m looking to collaborate on ...
+- 📫 How to reach me ...
+- 😄 Pronouns: ...
+- ⚡ Fun fact: ...
+
+<!---
+zzikre/zzikre is a ✨ special ✨ repository because its `README.md` (this file) appears on your GitHub profile.
+You can click the Preview link to take a look at your changes.
+--->
+import sys
+import pygame
+import random
+
+# Initialize Pygame
+pygame.init()
+
+# Set up some constants
+WIDTH, HEIGHT = 800, 600
+FPS = 60
+SPACESHIP_SPEED = 5
+BULLET_SPEED = 10
+BULLET_LIFETIME = 250
+MISSILE_SPEED = 3
+MISSILE_LIFETIME = 1000
+MISSILE_DAMAGE = 5
+ASTEROID_SPEED = 2
+ASTEROID_SPAWN_RATE = 120
+ASTEROID_SIZES = [30, 50, 70]
+MAX_ASTEROIDS = 10
+MISSILE_COOLDOWN = 300
+FONT_SIZE = 32
+
+# Colors
+WHITE = (255, 255, 255)
+RED = (255, 0, 0)
+GREEN = (0, 255, 0)
+BLUE = (0, 0, 255)
+BLACK = (0, 0, 0)
+
+# Set up some variables
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+clock = pygame.time.Clock()
+font = pygame.font.Font(None, FONT_SIZE)
+
+# Player spaceship
+spaceship = pygame.image.load('spaceship.png').convert_alpha()
+spaceship_rect = spaceship.get_rect()
+
+# Asteroids
+asteroids = []
+asteroid_images = []
+for size in ASTEROID_SIZES:
+    asteroid_images.append(pygame.image.load(f'asteroid_{size}.png').convert_alpha())
+
+# Missiles
+missiles = []
+missile_cooldown = 0
+
+# Game over
+game_over = False
+
+def spawn_asteroid():
+    size = random.choice(ASTEROID_SIZES)
+    asteroid_image = random.choice(asteroid_images)
+    asteroid_rect = asteroid_image.get_rect(center=(random.randrange(WIDTH), random.randrange(-100, -50)))
+    asteroids.append((asteroid_image, asteroid_rect, size))
+
+def update_asteroids():
+    for i, (asteroid_image, asteroid_rect, size) in enumerate(asteroids):
+        asteroid_rect.move_ip(0, ASTEROID_SPEED)
+        if asteroid_rect.top > HEIGHT:
+            asteroids.pop(i)
+
+def draw_asteroids():
+    for asteroid_image, asteroid_rect, size in asteroids:
+        screen.blit(asteroid_image, asteroid_rect)
+
+def spawn_missile():
+    missile_rect = pygame.Rect(spaceship_rect.centerx, spaceship_rect.centery, 5, 10)
+    missiles.append((missile_rect, BULLET_SPEED))
+
+def update_missiles():
+    for i, (missile_rect, speed) in enumerate(missiles):
+        missile_rect.move_ip(0, speed)
+        if missile_rect.top < -10:
+            missiles.pop(i)
+
+def draw_missiles():
+    for missile_rect, speed in missiles:
+        pygame.draw.rect(screen, RED, missile_rect)
+
+def check_collisions():
+    for asteroid_image, asteroid_rect, size in asteroids:
+        for missile_rect, speed in missiles:
+            if missile_rect.colliderect(asteroid_rect):
+                asteroids.remove((
